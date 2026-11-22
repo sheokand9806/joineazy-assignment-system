@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../../api.js';
-import { Alert, Badge, ProgressBar, Spinner, Stat } from '../../components/ui.jsx';
+import { Alert, Avatar, Badge, Icon, ProgressBar, SegTabs, Spinner } from '../../components/ui.jsx';
 import { fmtDate, pct } from '../../utils.js';
 
 export default function AssignmentDetail() {
@@ -18,72 +18,81 @@ export default function AssignmentDetail() {
   if (!data) return <Spinner />;
   const { assignment: a, summary: s, groups, students } = data;
 
+  const stats = [
+    ['Groups confirmed', `${s.confirmedGroups}/${s.totalGroups}`, pct(s.confirmedGroups, s.totalGroups)],
+    ['Students covered', `${s.confirmedStudents}/${s.totalStudents}`, pct(s.confirmedStudents, s.totalStudents)],
+  ];
+
   return (
     <div className="space-y-6">
-      <Link to="/admin" className="text-sm text-brand-600 hover:underline">← Back to dashboard</Link>
+      <Link to="/admin" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-ink">
+        <Icon name="arrowLeft" className="h-4 w-4" /> Overview
+      </Link>
       <div>
-        <h1 className="text-2xl font-bold">{a.title}</h1>
-        <p className="mt-1 text-sm text-slate-600">{a.description}</p>
-        <p className="mt-2 text-xs text-slate-500">
-          Due {fmtDate(a.dueDate)} · {a.assignTo === 'all' ? 'All students' : 'Selected groups'} ·{' '}
-          <a href={a.onedriveLink} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline">OneDrive link ↗</a>
-        </p>
+        <h1 className="text-3xl font-extrabold sm:text-4xl">{a.title}</h1>
+        {a.description && <p className="mt-2 max-w-2xl text-slate-600">{a.description}</p>}
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-medium text-slate-500">
+          <span>Due {fmtDate(a.dueDate)}</span>
+          <Badge tone="indigo" dot={false}>{a.assignTo === 'all' ? 'All students' : 'Selected groups'}</Badge>
+          <a href={a.onedriveLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-semibold text-brand-600 hover:underline">
+            OneDrive link <Icon name="link" className="h-3.5 w-3.5" />
+          </a>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Groups confirmed" value={`${s.confirmedGroups}/${s.totalGroups}`} />
-        <Stat label="Group completion" value={`${pct(s.confirmedGroups, s.totalGroups)}%`} />
-        <Stat label="Students covered" value={`${s.confirmedStudents}/${s.totalStudents}`} />
-        <Stat label="Student completion" value={`${pct(s.confirmedStudents, s.totalStudents)}%`} />
-      </div>
-
-      <div className="flex gap-1 rounded-lg bg-slate-200 p-1 text-sm sm:w-fit">
-        {[['groups', 'Group-wise'], ['students', 'Student-wise']].map(([k, l]) => (
-          <button key={k} onClick={() => setTab(k)} className={`flex-1 rounded-md px-4 py-1.5 ${tab === k ? 'bg-white shadow-sm' : 'text-slate-600'}`}>{l}</button>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {stats.map(([l, v, p]) => (
+          <div key={l} className="card">
+            <div className="flex items-baseline justify-between">
+              <p className="tile-title">{l}</p>
+              <p className="text-3xl font-extrabold">{v}</p>
+            </div>
+            <div className="mt-4"><ProgressBar value={p} /></div>
+          </div>
         ))}
       </div>
+
+      <SegTabs value={tab} onChange={setTab} options={[['groups', 'By group'], ['students', 'By student']]} />
 
       {tab === 'groups' ? (
         groups.length === 0 ? <p className="text-sm text-slate-500">No groups are targeted by this assignment.</p> : (
           <div className="grid gap-4 md:grid-cols-2">
             {groups.map((g) => (
               <div key={g.id} className="card">
-                <div className="mb-2 flex items-center justify-between">
-                  <h3 className="font-semibold">{g.name}</h3>
-                  {g.confirmed ? <Badge tone="green">✓ Confirmed</Badge> : <Badge tone="amber">Pending</Badge>}
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <h3 className="font-bold">{g.name}</h3>
+                  {g.confirmed ? <Badge tone="green">Confirmed</Badge> : <Badge tone="amber">Pending</Badge>}
                 </div>
-                <ProgressBar value={g.confirmed ? 100 : 0} size="sm" />
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mb-4 text-xs font-medium text-slate-500">
                   {g.confirmed ? `By ${g.confirmedByName} on ${fmtDate(g.confirmedAt)}` : 'Not confirmed yet'}
                 </p>
-                <p className="mt-2 text-xs text-slate-600">Members: {g.members.map((m) => m.name).join(', ') || '—'}</p>
+                <div className="flex -space-x-2">
+                  {g.members.map((m) => <span key={m.id} className="rounded-full ring-2 ring-white" title={m.name}><Avatar name={m.name} size="sm" /></span>)}
+                </div>
               </div>
             ))}
           </div>
         )
       ) : (
-        <div className="card overflow-x-auto p-0">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-              <tr><th className="px-5 py-2">Student</th><th className="px-3 py-2">Group</th><th className="px-3 py-2">Status</th><th className="px-3 py-2">Confirmed at</th></tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {students.length === 0 && <tr><td colSpan={4} className="p-6 text-center text-slate-500">No students in targeted groups.</td></tr>}
-              {students.map((st) => (
-                <tr key={`${st.groupId}-${st.id}`}>
-                  <td className="px-5 py-2.5">
-                    <div className="font-medium">{st.name}</div>
-                    <div className="text-xs text-slate-500">{st.email}{st.studentId ? ` · ${st.studentId}` : ''}</div>
-                  </td>
-                  <td className="px-3 py-2.5">{st.groupName}</td>
-                  <td className="px-3 py-2.5">
-                    {st.confirmed ? <Badge tone="green">{st.confirmedByThisStudent ? '✓ Confirmed by them' : '✓ Via group'}</Badge> : <Badge tone="amber">Pending</Badge>}
-                  </td>
-                  <td className="px-3 py-2.5 text-slate-600">{st.confirmedAt ? fmtDate(st.confirmedAt) : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="card !p-2 sm:!p-3">
+          {students.length === 0 && <p className="p-6 text-center text-sm text-slate-500">No students in the targeted groups.</p>}
+          <ul className="divide-y divide-slate-100">
+            {students.map((st) => (
+              <li key={`${st.groupId}-${st.id}`} className="flex flex-wrap items-center gap-3 px-3 py-3">
+                <Avatar name={st.name} />
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold">{st.name}</div>
+                  <div className="truncate text-xs text-slate-500">{st.groupName} · {st.studentId || st.email}</div>
+                </div>
+                <div className="text-right">
+                  {st.confirmed
+                    ? <Badge tone="green">{st.confirmedByThisStudent ? 'Confirmed by them' : 'Confirmed by group'}</Badge>
+                    : <Badge tone="amber">Pending</Badge>}
+                  {st.confirmedAt && <div className="mt-1 text-xs text-slate-500">{fmtDate(st.confirmedAt)}</div>}
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

@@ -62,12 +62,12 @@ export default function AssignmentForm({ assignment, onClose, onSaved }) {
 
         <fieldset>
           <legend className="label">Assign to</legend>
-          <div className="flex gap-4 text-sm">
+          <div className="flex flex-wrap gap-4 text-sm font-medium">
             <label className="flex items-center gap-2"><input type="radio" checked={form.assignTo === 'all'} onChange={() => setForm({ ...form, assignTo: 'all' })} /> All students</label>
             <label className="flex items-center gap-2"><input type="radio" checked={form.assignTo === 'groups'} onChange={() => setForm({ ...form, assignTo: 'groups' })} /> Specific groups</label>
           </div>
           {form.assignTo === 'groups' && (
-            <div className="mt-3 max-h-40 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-3">
+            <div className="mt-3 max-h-40 space-y-2 overflow-y-auto rounded-xl bg-slate-50 p-3.5">
               {groups.length === 0 && <p className="text-sm text-slate-500">No groups exist yet.</p>}
               {groups.map((g) => (
                 <label key={g.id} className="flex items-center gap-2 text-sm">

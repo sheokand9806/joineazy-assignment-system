@@ -13,22 +13,20 @@ export default function Register() {
 
   const submit = async (e) => {
     e.preventDefault();
-    setError('');
-    setBusy(true);
-    try {
-      await register(form);
-      navigate('/student');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
+    setError(''); setBusy(true);
+    try { await register(form); navigate('/student'); }
+    catch (err) { setError(err.message); } finally { setBusy(false); }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-md">
-        <h1 className="mb-6 text-center text-3xl font-bold text-brand-600">Create student account</h1>
+        <div className="mb-8 flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-lg font-extrabold text-white shadow-glow">J</span>
+          <span className="text-lg font-extrabold">Joineazy</span>
+        </div>
+        <h1 className="text-3xl font-extrabold">Create your account</h1>
+        <p className="mb-8 mt-2 text-slate-500">Teammates can add you to a group with your email or student ID.</p>
         <form onSubmit={submit} className="card space-y-4">
           <Alert>{error}</Alert>
           <div>
@@ -41,18 +39,18 @@ export default function Register() {
           </div>
           <div>
             <label className="label" htmlFor="sid">Student ID</label>
-            <input id="sid" className="input" placeholder="e.g. S2024" value={form.studentId} onChange={set('studentId')} />
-            <p className="mt-1 text-xs text-slate-500">Teammates can add you using your email or student ID.</p>
+            <input id="sid" className="input" placeholder="For example, S2024" value={form.studentId} onChange={set('studentId')} />
           </div>
           <div>
             <label className="label" htmlFor="pw">Password</label>
             <input id="pw" type="password" required minLength={6} className="input" value={form.password} onChange={set('password')} />
+            <p className="mt-1.5 text-xs text-slate-500">At least 6 characters.</p>
           </div>
-          <button className="btn-primary w-full" disabled={busy}>{busy ? 'Creating…' : 'Register'}</button>
-          <p className="text-center text-sm text-slate-500">
-            Already registered? <Link to="/login" className="font-medium text-brand-600 hover:underline">Sign in</Link>
-          </p>
+          <button className="btn-primary w-full" disabled={busy}>{busy ? 'Creating account…' : 'Create account'}</button>
         </form>
+        <p className="mt-5 text-center text-sm text-slate-500">
+          Already registered? <Link to="/login" className="font-semibold text-brand-600 hover:underline">Sign in</Link>
+        </p>
       </div>
     </div>
   );
