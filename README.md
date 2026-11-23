@@ -55,6 +55,25 @@ npm run dev                 # http://localhost:5173 (proxies /api to :5000)
 
 Useful scripts (backend): `npm run migrate`, `npm run seed` (`node src/seed.js --force` to add demo data to a non-empty DB).
 
+### Render deployment
+
+This repository contains separate `backend` and `frontend` applications. In the Render dashboard, configure the API service with:
+
+- **Root Directory:** `backend`
+- **Runtime:** `Node`
+- **Build Command:** `npm ci`
+- **Start Command:** `npm start`
+- **Health Check Path:** `/api/health`
+
+Set `DATABASE_URL` to a Render PostgreSQL connection string and set a secure `JWT_SECRET`. The included [`render.yaml`](render.yaml) defines the backend and PostgreSQL database; deploy it through **Blueprint** in Render.
+
+The `render.yaml` file does not configure a frontend static site. Deploy `frontend` separately as a **Static Site** with:
+
+- **Root Directory:** `frontend`
+- **Build Command:** `npm ci && npm run build`
+- **Publish Directory:** `dist`
+- **Environment Variable:** `VITE_API_URL=https://<your-backend-service>.onrender.com/api`
+
 ### Demo accounts (password `password123`)
 | Role | Email |
 |---|---|
