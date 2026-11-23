@@ -61,7 +61,7 @@ The app can run as one Render web service: Express serves both the API and the b
 
 - **Root Directory:** leave blank (repository root)
 - **Runtime:** `Node`
-- **Build Command:** `npm ci --prefix backend && npm ci --prefix frontend && npm run build --prefix frontend`
+- **Build Command:** `npm ci --prefix backend && npm ci --include=dev --prefix frontend && npm run build --prefix frontend`
 - **Start Command:** `npm start --prefix backend`
 - **Health Check Path:** `/api/health`
 
