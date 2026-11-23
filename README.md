@@ -57,22 +57,15 @@ Useful scripts (backend): `npm run migrate`, `npm run seed` (`node src/seed.js -
 
 ### Render deployment
 
-This repository contains separate `backend` and `frontend` applications. In the Render dashboard, configure the API service with:
+The app can run as one Render web service: Express serves both the API and the built React frontend. Configure the service with:
 
-- **Root Directory:** `backend`
+- **Root Directory:** leave blank (repository root)
 - **Runtime:** `Node`
-- **Build Command:** `npm ci`
-- **Start Command:** `npm start`
+- **Build Command:** `npm ci --prefix backend && npm ci --prefix frontend && npm run build --prefix frontend`
+- **Start Command:** `npm start --prefix backend`
 - **Health Check Path:** `/api/health`
 
-Set `DATABASE_URL` to a Render PostgreSQL connection string and set a secure `JWT_SECRET`. The included [`render.yaml`](render.yaml) defines the backend and PostgreSQL database; deploy it through **Blueprint** in Render.
-
-The `render.yaml` file does not configure a frontend static site. Deploy `frontend` separately as a **Static Site** with:
-
-- **Root Directory:** `frontend`
-- **Build Command:** `npm ci && npm run build`
-- **Publish Directory:** `dist`
-- **Environment Variable:** `VITE_API_URL=https://<your-backend-service>.onrender.com/api`
+Set `DATABASE_URL` to a Render PostgreSQL connection string and set a secure `JWT_SECRET`. No `VITE_API_URL` or `CORS_ORIGIN` is needed when the frontend and API share the same service. The included [`render.yaml`](render.yaml) defines the combined web service and PostgreSQL database; deploy it through **Blueprint** in Render.
 
 ### Demo accounts (password `password123`)
 | Role | Email |

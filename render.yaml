@@ -5,12 +5,11 @@ databases:
 
 services:
   - type: web
-    name: joineazy-backend
+    name: joineazy
     runtime: node
     plan: free
-    rootDir: backend
-    buildCommand: npm ci
-    startCommand: npm start
+    buildCommand: npm ci --prefix backend && npm ci --prefix frontend && npm run build --prefix frontend
+    startCommand: npm start --prefix backend
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
